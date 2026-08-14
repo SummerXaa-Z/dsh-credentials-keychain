@@ -17,8 +17,10 @@ This provider moves secrets into the macOS login keychain, which the agent's chi
 ## Install
 
 ```sh
-dsh plugin --profile headless add dsh-credentials-keychain
+dsh plugin --profile headless add github:SummerXaa-Z/dsh-credentials-keychain
 ```
+
+(npm package coming once registry 2FA bootstrap is sorted — the CLI publish flow currently requires TOTP, and npm no longer enrolls new TOTP devices.)
 
 Then swap the credentials provider in your patch layer (`~/.dsh/cordis.patch.yml` or `--patch <file>`):
 
@@ -76,8 +78,10 @@ DeepSeek Harness（dsh）的 macOS 钥匙串凭据 provider。
 ### 安装
 
 ```sh
-dsh plugin --profile headless add dsh-credentials-keychain
+dsh plugin --profile headless add github:SummerXaa-Z/dsh-credentials-keychain
 ```
+
+（npm 包待发：registry 发布流程强制 TOTP，而 npm 已停止新 TOTP 设备绑定。）
 
 然后在补丁层（`~/.dsh/cordis.patch.yml` 或 `--patch <文件>`）替换凭据 provider：
 
