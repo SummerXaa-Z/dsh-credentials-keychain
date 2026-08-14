@@ -50,11 +50,19 @@ Semantics kept from the seam contract:
 - Process environment shadows the keychain (per-run operator intent wins).
 - An empty stored value counts as absent.
 - `set` rejects while a read-only source (the environment) shadows the ref.
+- `describe` checks existence **without reading the value** — a status query never pulls plaintext into the agent process.
+- Errors from the `security` CLI are sanitized: exit code and stderr only, never the command line (which would carry the secret on a failed `set`).
+
+## Known limitations
+
+- **`set` passes the secret via `argv`.** The `security` CLI has no stdin channel for `add-generic-password`, so the value is briefly visible to same-user processes running `ps` during the write (milliseconds). This is a macOS tooling constraint, not a design choice — the same is true of the manual `security add-generic-password -w` workflow. Secrets at rest are never in argv; only writes are.
+- A locked keychain surfaces as an interactive unlock prompt to the GUI user; headless runs time out after 10s with a sanitized error.
 
 ## Verified behavior (0.1.0-rc.6)
 
 - Positive: with the file credential removed, model requests authenticate via the keychain entry alone.
 - Negative: deleting the keychain entry produces `MISSING_CREDENTIAL` naming the correct reference — no silent degradation.
+- Seam semantics: env shadowing wins and blocks `set`; empty values rejected; `unset` on an absent ref is a silent no-op (no change event).
 
 ## Roadmap
 
@@ -105,10 +113,18 @@ LLM 适配器每次请求解析一次引用，轮换后无需重启。
 
 保留 seam 原生语义：进程环境遮蔽钥匙串（按次操作意图优先）；空值等于不存在；只读源遮蔽时 `set` 拒绝。
 
+补充两条实现保证：`describe` 只查存在性**不读取值**，状态查询不会把明文拉进 agent 进程；`security` CLI 报错经过脱敏，只带退出码和 stderr，绝不带命令行（否则 `set` 失败会把密钥带进错误消息）。
+
+### 已知限制
+
+- **`set` 的密钥走 argv。** `security` CLI 没有 stdin 传密码的通道，写入瞬间（毫秒级）同用户进程 `ps` 可见。这是 macOS 工具本身的限制，手工 `security add-generic-password -w` 同样如此；静态存储的密钥从不上 argv，只有写入操作。
+- 钥匙串锁定会向 GUI 用户弹解锁框；无头运行 10 秒超时，报脱敏错误。
+
 ### 已验证行为（0.1.0-rc.6）
 
 - 正向：移除文件凭据后，模型请求仅经钥匙串条目完成认证。
 - 负向：删除钥匙串条目后报 `MISSING_CREDENTIAL` 且引用名正确，无静默降级。
+- seam 语义：环境遮蔽生效且拒绝 `set`；空值拒绝；对不存在的条目 `unset` 是静默无操作（不发变更事件）。
 
 ### 许可
 
