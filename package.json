@@ -1,6 +1,6 @@
 {
   "name": "dsh-credentials-keychain",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "macOS Keychain credentials provider for DeepSeek Harness (dsh) — keeps model-facing secrets out of files the agent can read",
   "type": "module",
   "license": "MIT",
